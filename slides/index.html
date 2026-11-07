@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KODITA — Module 01: Web Dev</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0B0614;--panel:#1A1029;--line:rgba(139,92,246,.18);--v:#8B5CF6;--v2:#C4B5FD;--c:#22D3EE;--t:#EDE9FE;--m:#9C8FC0;--ok:#34D399;--bad:#F87171}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--t);font-family:'Space Grotesk',system-ui,sans-serif;overflow:hidden}
+body::before{content:"";position:fixed;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(ellipse at center,#000 30%,transparent 80%);pointer-events:none}
+body::after{content:"";position:fixed;width:60vw;height:60vw;left:50%;top:50%;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(139,92,246,.22),transparent 65%);pointer-events:none}
+.mono{font-family:'JetBrains Mono',monospace}
+.deck{position:relative;height:100%;z-index:1}
+.slide{position:absolute;inset:0;padding:6vh 7vw 12vh;display:flex;flex-direction:column;justify-content:center;opacity:0;pointer-events:none;transform:translateY(14px);transition:opacity .45s,transform .45s}
+.slide.on{opacity:1;pointer-events:auto;transform:none}
+.tag{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.18em;color:var(--c);margin-bottom:18px}
+.tag::before{content:"▸ "}
+h1{font-size:clamp(40px,7vw,88px);line-height:1;font-weight:700;letter-spacing:-.02em}
+h1 .g{color:var(--v2);text-shadow:0 0 28px rgba(139,92,246,.8)}
+h2{font-size:clamp(28px,4vw,48px);font-weight:700;letter-spacing:-.01em;margin-bottom:22px}
+p.lead{font-size:clamp(16px,1.6vw,21px);color:var(--m);max-width:640px;margin-top:20px;line-height:1.5}
+.hud{position:relative;background:rgba(26,16,41,.7);backdrop-filter:blur(10px);border:1px solid rgba(139,92,246,.35);border-radius:6px;padding:22px 24px}
+.hud::before,.hud::after{content:"";position:absolute;width:16px;height:16px;border:2px solid var(--v2)}
+.hud::before{top:-2px;left:-2px;border-right:0;border-bottom:0}
+.hud::after{bottom:-2px;right:-2px;border-left:0;border-top:0}
+.hud .lbl{position:absolute;top:-10px;left:22px;background:var(--bg);padding:0 8px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--v2);letter-spacing:.12em}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:stretch}
+.obj{list-style:none;display:grid;gap:14px;max-width:720px}
+.obj li{display:flex;gap:16px;align-items:center;font-size:clamp(16px,1.7vw,22px)}
+.obj .n{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--bg);background:var(--v2);padding:4px 8px;border-radius:3px}
+pre{font-family:'JetBrains Mono',monospace;font-size:clamp(13px,1.3vw,17px);line-height:1.7;white-space:pre-wrap}
+.k{color:#F472B6}.a{color:var(--c)}.s{color:#A5F3FC}.cm{color:#6B5E8E}
+.prev{background:#fff;color:#111;border-radius:4px;padding:18px;font-family:system-ui;min-height:140px}
+.prev h1{font-size:26px;letter-spacing:0;line-height:1.2}.prev p{margin-top:8px}
+textarea{width:100%;height:100%;min-height:220px;background:transparent;border:0;outline:0;color:var(--t);font-family:'JetBrains Mono',monospace;font-size:15px;line-height:1.7;resize:none}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:760px;margin-top:8px}
+.opt{font:inherit;font-size:18px;text-align:left;color:var(--t);background:rgba(26,16,41,.7);border:1px solid rgba(139,92,246,.35);border-radius:6px;padding:16px 18px;cursor:pointer;transition:.2s}
+.opt:hover{border-color:var(--v2);box-shadow:0 0 18px rgba(139,92,246,.35)}
+.opt.ok{border-color:var(--ok);color:var(--ok)}.opt.no{border-color:var(--bad);color:var(--bad)}
+.fb{font-family:'JetBrains Mono',monospace;margin-top:18px;min-height:24px;color:var(--m)}
+.bar{width:min(520px,80vw);height:10px;background:var(--panel);border:1px solid rgba(139,92,246,.35);border-radius:6px;overflow:hidden;margin:26px 0 10px}
+.bar i{display:block;height:100%;width:0;background:var(--v);box-shadow:0 0 16px var(--v);transition:width 1.2s .3s}
+.slide.on .bar i{width:17%}
+.status{font-family:'JetBrains Mono',monospace;color:var(--ok);letter-spacing:.14em;font-size:14px}
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:2;display:flex;align-items:center;justify-content:space-between;padding:18px 7vw;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--m)}
+.dots{display:flex;gap:8px}
+.dots b{width:26px;height:4px;background:var(--panel);border-radius:2px;cursor:pointer}
+.dots b.on{background:var(--v2);box-shadow:0 0 10px var(--v)}
+.nav button{font:inherit;color:var(--t);background:transparent;border:1px solid rgba(139,92,246,.4);border-radius:4px;padding:7px 12px;cursor:pointer}
+.nav button:hover{border-color:var(--v2)}
+.logo{font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--v2)}
+@media(max-width:760px){.cols,.opts{grid-template-columns:1fr}.slide{padding:5vh 6vw 14vh;justify-content:flex-start;overflow:auto}}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+<section class="slide on">
+  <div class="tag">MODULE 01 // WEB DEV</div>
+  <h1>Bangun<br><span class="g">halaman pertamamu</span></h1>
+  <p class="lead">Hari ini kamu bakal bikin website sendiri dari nol, cuma pakai HTML.</p>
+</section>
+
+<section class="slide">
+  <div class="tag">MISSION BRIEFING</div>
+  <h2>Target misi hari ini</h2>
+  <ul class="obj">
+    <li><span class="n">01</span>Paham apa itu HTML dan cara kerjanya</li>
+    <li><span class="n">02</span>Pakai tag heading, paragraf, dan gambar</li>
+    <li><span class="n">03</span>Bikin halaman "tentang aku"</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <div class="tag">CORE CONCEPT</div>
+  <h2>HTML = kerangka website</h2>
+  <div class="cols">
+    <div class="hud"><span class="lbl">INPUT // index.html</span>
+<pre><span class="k">&lt;h1&gt;</span>Halo, aku Budi<span class="k">&lt;/h1&gt;</span>
+<span class="k">&lt;p&gt;</span>Aku suka main game.<span class="k">&lt;/p&gt;</span>
+<span class="cm">&lt;!-- h1 = judul, p = paragraf --&gt;</span></pre>
+    </div>
+    <div class="hud"><span class="lbl">OUTPUT // browser</span>
+      <div class="prev"><h1>Halo, aku Budi</h1><p>Aku suka main game.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="tag">LIVE TERMINAL</div>
+  <h2>Coba sendiri, langsung kelihatan</h2>
+  <div class="cols">
+    <div class="hud"><span class="lbl">EDIT ME</span>
+      <textarea id="code" spellcheck="false"><h1>Halo, aku ...</h1>
+<p>Hobiku ...</p></textarea>
+    </div>
+    <div class="hud"><span class="lbl">LIVE PREVIEW</span>
+      <div class="prev" id="out"></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="tag">SYSTEM CHECK</div>
+  <h2>Tag mana untuk paragraf?</h2>
+  <div class="opts" id="quiz">
+    <button class="opt">&lt;h1&gt;</button>
+    <button class="opt" data-ok>&lt;p&gt;</button>
+    <button class="opt">&lt;img&gt;</button>
+    <button class="opt">&lt;para&gt;</button>
+  </div>
+  <div class="fb" id="fb">// pilih satu jawaban</div>
+</section>
+
+<section class="slide">
+  <div class="status">STATUS: MISSION COMPLETE</div>
+  <h1 style="margin-top:14px">Module 01<br><span class="g">selesai</span></h1>
+  <div class="bar"><i></i></div>
+  <div class="mono" style="color:var(--m);font-size:13px">PROGRESS 1/6 // NEXT: MODULE 02 — CSS</div>
+</section>
+
+</div>
+
+<div class="nav">
+  <span class="logo">&lt;/KODITA&gt;</span>
+  <div class="dots" id="dots"></div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <span id="cnt">01/06</span>
+    <button id="prev" aria-label="Slide sebelumnya">←</button>
+    <button id="next" aria-label="Slide berikutnya">→</button>
+  </div>
+</div>
+
+<script>
+const S=[...document.querySelectorAll('.slide')],D=document.getElementById('dots');let i=0;
+S.forEach((_,k)=>{const b=document.createElement('b');b.onclick=()=>go(k);D.appendChild(b)});
+function go(n){i=Math.max(0,Math.min(S.length-1,n));S.forEach((s,k)=>s.classList.toggle('on',k===i));[...D.children].forEach((b,k)=>b.classList.toggle('on',k===i));document.getElementById('cnt').textContent=String(i+1).padStart(2,'0')+'/'+String(S.length).padStart(2,'0')}
+document.getElementById('next').onclick=()=>go(i+1);document.getElementById('prev').onclick=()=>go(i-1);
+document.addEventListener('keydown',e=>{if(e.target.tagName==='TEXTAREA')return;if(e.key==='ArrowRight'||e.key===' ')go(i+1);if(e.key==='ArrowLeft')go(i-1)});
+const c=document.getElementById('code'),o=document.getElementById('out');
+const render=()=>{const t=document.createElement('template');t.innerHTML=c.value;t.content.querySelectorAll('script,iframe,object,embed').forEach(x=>x.remove());t.content.querySelectorAll('*').forEach(el=>[...el.attributes].forEach(a=>{if(a.name.startsWith('on'))el.removeAttribute(a.name)}));o.replaceChildren(t.content)};
+c.addEventListener('input',render);render();
+const fb=document.getElementById('fb');
+document.querySelectorAll('#quiz .opt').forEach(b=>b.onclick=()=>{document.querySelectorAll('#quiz .opt').forEach(x=>x.classList.remove('ok','no'));if(b.hasAttribute('data-ok')){b.classList.add('ok');fb.style.color='var(--ok)';fb.textContent='// ACCESS GRANTED — <p> artinya paragraph'}else{b.classList.add('no');fb.style.color='var(--bad)';fb.textContent='// ACCESS DENIED — coba lagi'}});
+go(0);
+</script>
+</body>
+</html>

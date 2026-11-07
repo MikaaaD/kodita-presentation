@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KODITA OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0B0614;--panel:#140C22;--panel2:#1A1029;--ln:rgba(139,92,246,.35);--v:#8B5CF6;--v2:#C4B5FD;--c:#22D3EE;--t:#EDE9FE;--m:#9C8FC0;--ok:#34D399;--bad:#F87171}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--t);font-family:'Space Grotesk',system-ui,sans-serif;overflow:hidden;user-select:none}
+.mono{font-family:'JetBrains Mono',monospace}
+@media (pointer:fine){body,body *{cursor:none!important}}
+#grid{position:fixed;inset:0;background-image:linear-gradient(rgba(139,92,246,.14) 1px,transparent 1px),linear-gradient(90deg,rgba(139,92,246,.14) 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(ellipse at 50% 45%,#000 25%,transparent 80%);animation:gridmove 30s linear infinite}
+@keyframes gridmove{to{background-position:48px 48px}}
+#glow{position:fixed;width:70vw;height:70vw;left:50%;top:45%;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(139,92,246,.25),transparent 62%);pointer-events:none}
+#wall{position:fixed;left:50%;top:44%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;opacity:.9}
+#wall .lg{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:clamp(34px,6vw,80px);color:var(--v2);text-shadow:0 0 40px rgba(139,92,246,.7)}
+#wall .sb{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.3em;color:var(--m);margin-top:10px}
+
+#boot{position:fixed;inset:0;z-index:999;background:var(--bg);display:flex;flex-direction:column;justify-content:center;padding:0 10vw;font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--m);transition:opacity .6s}
+#boot .ln{opacity:0;transform:translateX(-6px);transition:.25s;margin:4px 0}
+#boot .ln.on{opacity:1;transform:none}
+#boot .ln b{color:var(--ok);font-weight:400}
+#boot .big{color:var(--v2);font-size:22px;margin-bottom:18px}
+#boot .pb{width:min(420px,70vw);height:6px;border:1px solid var(--ln);border-radius:4px;margin-top:22px;overflow:hidden}
+#boot .pb i{display:block;height:100%;width:0;background:var(--v);box-shadow:0 0 14px var(--v);transition:width .25s}
+#boot.off{opacity:0;pointer-events:none}
+
+#desk{position:fixed;inset:0 0 52px 0;padding:22px;display:grid;grid-template-rows:repeat(auto-fill,108px);grid-auto-flow:column;grid-auto-columns:104px;gap:6px;align-content:start}
+.ic{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 4px;border-radius:6px;border:1px solid transparent;text-align:center;font-size:12.5px;line-height:1.25;color:var(--t);opacity:0;transform:translateY(10px) scale(.9);transition:opacity .4s,transform .4s,background .15s}
+.ic.in{opacity:1;transform:none}
+.ic:hover{background:rgba(139,92,246,.12)}
+.ic.sel{background:rgba(139,92,246,.22);border-color:var(--ln)}
+.ic svg{width:54px;height:46px;filter:drop-shadow(0 0 10px rgba(139,92,246,.45));transition:transform .2s}
+.ic:hover svg{transform:translateY(-2px)}
+.ic.lock{opacity:.45!important}
+.ic span{text-shadow:0 1px 3px #000}
+
+#bar{position:fixed;left:0;right:0;bottom:0;height:52px;z-index:900;background:rgba(20,12,34,.85);backdrop-filter:blur(12px);border-top:1px solid var(--ln);display:flex;align-items:center;gap:10px;padding:0 14px}
+#bar .os{font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--v2);padding:6px 10px;border:1px solid var(--ln);border-radius:4px}
+#tasks{display:flex;gap:6px;flex:1;overflow:hidden}
+.tk{font:inherit;font-size:12.5px;color:var(--t);background:rgba(139,92,246,.1);border:1px solid transparent;border-radius:4px;padding:7px 12px;max-width:190px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:.2s;animation:pop .3s}
+.tk.act{border-color:var(--v2);background:rgba(139,92,246,.25)}
+@keyframes pop{from{transform:scale(.6);opacity:0}}
+#demo{font:inherit;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--c);background:transparent;border:1px solid rgba(34,211,238,.4);border-radius:4px;padding:7px 10px}
+#demo:hover{background:rgba(34,211,238,.1)}
+#clock{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--m);text-align:right;line-height:1.3}
+
+.win{position:fixed;z-index:10;display:flex;flex-direction:column;background:rgba(20,12,34,.92);backdrop-filter:blur(14px);border:1px solid var(--ln);border-radius:8px;box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 0 1px rgba(196,181,253,.06),0 0 40px rgba(139,92,246,.15);transition:transform .38s cubic-bezier(.2,.9,.25,1.05),opacity .3s,left .3s,top .3s,width .3s,height .3s;overflow:hidden}
+.win.drag{transition:none}
+.win.focus{border-color:rgba(196,181,253,.6)}
+.win::before,.win::after{content:"";position:absolute;width:14px;height:14px;border:2px solid var(--v2);z-index:3;pointer-events:none}
+.win::before{top:-1px;left:-1px;border-right:0;border-bottom:0;border-radius:8px 0 0 0}
+.win::after{bottom:-1px;right:-1px;border-left:0;border-top:0;border-radius:0 0 8px 0}
+.tb{height:40px;flex:none;display:flex;align-items:center;gap:10px;padding:0 10px 0 14px;border-bottom:1px solid rgba(139,92,246,.22);background:rgba(139,92,246,.07)}
+.tb .ti{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--m);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tb .ti b{color:var(--v2);font-weight:400}
+.tb button{width:26px;height:26px;border-radius:4px;border:1px solid transparent;background:transparent;color:var(--m);font:inherit;font-size:14px;line-height:1;display:grid;place-items:center}
+.tb button:hover{border-color:var(--ln);color:var(--t)}
+.tb button.x:hover{background:rgba(248,113,113,.18);border-color:var(--bad);color:var(--bad)}
+.wb{flex:1;overflow:auto;position:relative}
+
+.ex{padding:18px;display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:8px;align-content:start}
+.ex .ic{opacity:1;transform:none}
+.ex .ic.stag{opacity:0;transform:translateY(8px);animation:fin .35s forwards}
+@keyframes fin{to{opacity:1;transform:none}}
+.ex .ic.lock{opacity:.45}
+.exh{padding:12px 18px 0;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--m);letter-spacing:.12em}
+
+.note{padding:22px 26px;font-family:'JetBrains Mono',monospace;font-size:14px;line-height:1.8;color:var(--t);white-space:pre-wrap;user-select:text}
+.note .h{color:var(--v2)}
+
+.toast{position:fixed;left:50%;bottom:70px;transform:translateX(-50%) translateY(20px);opacity:0;z-index:950;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--t);background:var(--panel2);border:1px solid var(--ln);border-radius:6px;padding:10px 16px;transition:.3s;pointer-events:none}
+.toast.on{opacity:1;transform:translateX(-50%)}
+
+.vw{display:flex;flex-direction:column;height:100%;container-type:size}
+.stage{flex:1;position:relative;overflow:hidden}
+.stage::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(139,92,246,.1) 1px,transparent 1px),linear-gradient(90deg,rgba(139,92,246,.1) 1px,transparent 1px);background-size:36px 36px;mask-image:radial-gradient(ellipse,#000 20%,transparent 75%);pointer-events:none}
+.sl{position:absolute;inset:0;padding:5cqh 6cqw;display:flex;flex-direction:column;justify-content:center;opacity:0;pointer-events:none;transform:translateX(30px);transition:opacity .4s,transform .4s;overflow:auto}
+.sl.on{opacity:1;pointer-events:auto;transform:none}
+.sl.back{transform:translateX(-30px)}
+.tag{font-family:'JetBrains Mono',monospace;font-size:max(11px,1.5cqw);letter-spacing:.18em;color:var(--c);margin-bottom:2.5cqh}
+.tag::before{content:"▸ "}
+.sl h1{font-size:max(26px,7.2cqw);line-height:1.02;font-weight:700;letter-spacing:-.02em}
+.sl h1 .g{color:var(--v2);text-shadow:0 0 28px rgba(139,92,246,.8)}
+.sl h2{font-size:max(20px,4.2cqw);font-weight:700;margin-bottom:3cqh;letter-spacing:-.01em}
+.lead{font-size:max(14px,2cqw);color:var(--m);max-width:62cqw;margin-top:3cqh;line-height:1.5}
+.obj{list-style:none;display:grid;gap:2.2cqh}
+.obj li{display:flex;gap:2cqw;align-items:center;font-size:max(14px,2.3cqw);opacity:0;transform:translateX(-10px);transition:.4s}
+.sl.on .obj li{opacity:1;transform:none}
+.obj .n{font-family:'JetBrains Mono',monospace;font-size:max(11px,1.4cqw);color:var(--bg);background:var(--v2);padding:3px 8px;border-radius:3px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:3cqw}
+.hud{position:relative;background:rgba(26,16,41,.75);border:1px solid var(--ln);border-radius:6px;padding:2.4cqh 2cqw}
+.hud .lbl{position:absolute;top:-9px;left:16px;background:#160d25;padding:0 8px;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--v2);letter-spacing:.12em}
+pre{font-family:'JetBrains Mono',monospace;font-size:max(12px,1.7cqw);line-height:1.7;white-space:pre-wrap;user-select:text}
+.k{color:#F472B6}.a{color:var(--c)}.s{color:#A5F3FC}.cm{color:#7A6C9E}.nb{color:#FBBF24}
+.prev{background:#fff;color:#111;border-radius:4px;padding:2cqh 1.6cqw;font-family:system-ui;min-height:16cqh;font-size:max(13px,1.7cqw);user-select:text}
+.prev h1{font-size:1.7em;letter-spacing:0;line-height:1.2;text-shadow:none}.prev p{margin-top:.5em}
+.term{background:#05030a;border-radius:4px;padding:2cqh 1.6cqw;font-family:'JetBrains Mono',monospace;font-size:max(12px,1.6cqw);color:var(--ok);min-height:16cqh}
+textarea{width:100%;height:100%;min-height:26cqh;background:transparent;border:0;outline:0;color:var(--t);font-family:'JetBrains Mono',monospace;font-size:max(13px,1.7cqw);line-height:1.7;resize:none}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:1.6cqw;max-width:80cqw}
+.opt{font:inherit;font-size:max(14px,2cqw);text-align:left;color:var(--t);background:rgba(26,16,41,.75);border:1px solid var(--ln);border-radius:6px;padding:2.2cqh 2cqw;transition:.2s}
+.opt:hover{border-color:var(--v2);box-shadow:0 0 18px rgba(139,92,246,.35)}
+.opt.ok{border-color:var(--ok);color:var(--ok)}.opt.no{border-color:var(--bad);color:var(--bad);animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.fb{font-family:'JetBrains Mono',monospace;margin-top:2.5cqh;min-height:22px;color:var(--m);font-size:max(12px,1.5cqw)}
+.pbar{width:min(460px,60cqw);height:10px;background:var(--panel);border:1px solid var(--ln);border-radius:6px;overflow:hidden;margin:4cqh 0 1.5cqh}
+.pbar i{display:block;height:100%;width:0;background:var(--v);box-shadow:0 0 16px var(--v);transition:width 1.2s .3s}
+.status{font-family:'JetBrains Mono',monospace;color:var(--ok);letter-spacing:.14em;font-size:max(11px,1.5cqw)}
+.ctl{height:46px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-top:1px solid rgba(139,92,246,.22);font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--m)}
+.dots{display:flex;gap:6px}
+.dots b{width:22px;height:4px;background:#2a1d42;border-radius:2px;transition:.3s}
+.dots b.on{background:var(--v2);box-shadow:0 0 10px var(--v);width:34px}
+.ctl button{font:inherit;color:var(--t);background:transparent;border:1px solid var(--ln);border-radius:4px;padding:6px 11px;margin-left:6px}
+.ctl button:hover{border-color:var(--v2)}
+
+#cur{position:fixed;left:0;top:0;z-index:2000;pointer-events:none;width:22px;height:22px;transform:translate(-100px,-100px);transition:opacity .2s}
+#cur svg{width:22px;height:22px;filter:drop-shadow(0 0 6px rgba(139,92,246,.9));transition:transform .12s}
+#cur.down svg{transform:scale(.82)}
+@media (pointer:coarse){#cur{display:none}}
+#ghost{position:fixed;left:0;top:0;z-index:2001;pointer-events:none;width:26px;height:26px;opacity:0;transition:opacity .3s}
+#ghost svg{width:26px;height:26px;filter:drop-shadow(0 0 8px rgba(34,211,238,.9))}
+#ghost.down svg{transform:scale(.8)}
+.rip{position:fixed;z-index:1999;width:10px;height:10px;margin:-5px 0 0 -5px;border:2px solid var(--v2);border-radius:50%;pointer-events:none;animation:rip .5s ease-out forwards}
+@keyframes rip{to{transform:scale(5);opacity:0}}
+
+@media (max-width:700px){
+  .win{left:0!important;top:0!important;width:100vw!important;height:calc(100vh - 52px)!important;border-radius:0}
+  .cols,.opts{grid-template-columns:1fr}
+  #desk{grid-auto-flow:row;grid-template-columns:repeat(auto-fill,96px);grid-template-rows:none;grid-auto-rows:108px}
+  #clock{display:none}
+}
+</style>
+</head>
+<body>
+<div id="grid"></div><div id="glow"></div>
+<div id="wall"><div class="lg">&lt;/KODITA&gt;</div><div class="sb">BELAJAR KODING BARENG</div></div>
+
+<div id="desk"></div>
+
+<div id="bar">
+  <span class="os">&lt;/K&gt;</span>
+  <div id="tasks"></div>
+  <button id="demo" title="Putar demo otomatis">▶ demo</button>
+  <div id="clock"></div>
+</div>
+
+<div id="boot">
+  <div class="big">KODITA OS v1.0</div>
+  <div class="ln">&gt; memuat kernel kodita ........ <b>[ OK ]</b></div>
+  <div class="ln">&gt; menyiapkan modul web_dev ..... <b>[ OK ]</b></div>
+  <div class="ln">&gt; menyiapkan modul game_dev .... <b>[ OK ]</b></div>
+  <div class="ln">&gt; menyapa kakak-kakak .......... <b>[ OK ]</b></div>
+  <div class="ln">&gt; selamat datang, coder!</div>
+  <div class="pb"><i id="bp"></i></div>
+</div>
+
+<div id="cur"><svg viewBox="0 0 24 24"><path d="M3 2 L3 19 L8 14.5 L11.5 22 L14.5 20.6 L11 13.4 L18 13.4 Z" fill="#EDE9FE" stroke="#8B5CF6" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
+<div id="ghost"><svg viewBox="0 0 24 24"><path d="M3 2 L3 19 L8 14.5 L11.5 22 L14.5 20.6 L11 13.4 L18 13.4 Z" fill="#CFFAFE" stroke="#22D3EE" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ======== DATA MATERI — tim Edu/Tech cukup edit bagian ini ======== */
+const FS = [
+ {id:'web',name:'Web Dev',type:'folder',color:'#8B5CF6',children:[
+  {id:'web1',name:'01_html.slide',type:'slide',slides:[
+   {t:'cover',tag:'MODULE 01 // WEB DEV',title:'Bangun',hl:'halaman pertamamu',lead:'Hari ini kamu bakal bikin website sendiri dari nol, cuma pakai HTML.'},
+   {t:'list',tag:'MISSION BRIEFING',title:'Target misi hari ini',items:['Paham apa itu HTML dan cara kerjanya','Pakai tag heading, paragraf, dan gambar','Bikin halaman "tentang aku"']},
+   {t:'code',tag:'CORE CONCEPT',title:'HTML = kerangka website',lang:'html',code:'<h1>Halo, aku Budi</h1>\n<p>Aku suka main game.</p>\n<!-- h1 = judul, p = paragraf -->',preview:'<h1>Halo, aku Budi</h1><p>Aku suka main game.</p>'},
+   {t:'live',tag:'LIVE TERMINAL',title:'Coba sendiri, langsung kelihatan',starter:'<h1>Halo, aku ...</h1>\n<p>Hobiku ...</p>'},
+   {t:'quiz',tag:'SYSTEM CHECK',title:'Tag mana untuk paragraf?',opts:['<h1>','<p>','<img>','<para>'],ok:1,msg:'<p> artinya paragraph'},
+   {t:'done',title:'Module 01',progress:1,total:6,next:'MODULE 02 — CSS'}]},
+  {id:'web2',name:'02_css.slide',type:'slide',slides:[
+   {t:'cover',tag:'MODULE 02 // WEB DEV',title:'Kasih',hl:'warna & gaya',lead:'HTML itu kerangkanya, CSS itu bajunya.'},
+   {t:'code',tag:'CORE CONCEPT',title:'Satu aturan CSS',lang:'html',code:'<style>\n  h1 { color: purple; }\n</style>\n<h1>Halo!</h1>',preview:'<h1 style="color:purple">Halo!</h1>'},
+   {t:'live',tag:'LIVE TERMINAL',title:'Ganti warnanya sesukamu',starter:'<style>\n  h1 { color: purple; }\n  p { font-size: 20px; }\n</style>\n<h1>Halo!</h1>\n<p>Ini website-ku</p>'},
+   {t:'done',title:'Module 02',progress:2,total:6,next:'MODULE 03 — LAYOUT'}]},
+  {id:'web3',name:'03_layout.slide',type:'slide',lock:true},
+  {id:'web4',name:'04_javascript.slide',type:'slide',lock:true},
+  {id:'web5',name:'05_interaktif.slide',type:'slide',lock:true},
+  {id:'web6',name:'06_publish.slide',type:'slide',lock:true}]},
+ {id:'game',name:'Game Dev',type:'folder',color:'#22D3EE',children:[
+  {id:'game1',name:'01_roblox_studio.slide',type:'slide',slides:[
+   {t:'cover',tag:'MODULE 01 // GAME DEV',title:'Masuk ke',hl:'Roblox Studio',lead:'Hari ini kamu jadi pembuat game, bukan cuma pemain.'},
+   {t:'list',tag:'MISSION BRIEFING',title:'Target misi hari ini',items:['Kenal Explorer, Properties, dan Toolbox','Bikin dan atur Part','Bikin map pertamamu']},
+   {t:'list',tag:'CORE CONCEPT',title:'Tiga panel penting',items:['Explorer — daftar semua benda di game','Properties — warna, ukuran, posisi benda','Toolbox — aset siap pakai']},
+   {t:'code',tag:'SNEAK PEEK // MODULE 03',title:'Nanti kita bikin benda bergerak',lang:'lua',code:'local part = workspace.Part\npart.BrickColor = BrickColor.new("Royal purple")\nprint("Part berubah warna!")',output:'> Part berubah warna!'},
+   {t:'quiz',tag:'SYSTEM CHECK',title:'Supaya Part nggak jatuh, centang…',opts:['CanCollide','Anchored','Transparency','Locked'],ok:1,msg:'Anchored = benda dipaku di tempatnya'},
+   {t:'done',title:'Module 01',progress:1,total:6,next:'MODULE 02 — OBBY'}]},
+  {id:'game2',name:'02_obby.slide',type:'slide',lock:true},
+  {id:'game3',name:'03_script_pertama.slide',type:'slide',lock:true},
+  {id:'game4',name:'04_jebakan.slide',type:'slide',lock:true},
+  {id:'game5',name:'05_koin_skor.slide',type:'slide',lock:true},
+  {id:'game6',name:'06_publish.slide',type:'slide',lock:true}]},
+ {id:'kenal',name:'Kenalan Yuk',type:'folder',color:'#F472B6',children:[
+  {id:'bond',name:'sesi_kenalan.slide',type:'slide',slides:[
+   {t:'cover',tag:'SESI KENALAN',title:'Halo, kami',hl:'kakak-kakak KODITA',lead:'Sebelum ngoding, kenalan dulu yuk!'},
+   {t:'list',tag:'GAME 01',title:'Tebak Kakak',items:['Kakak menyebut satu fakta unik','Kalian tebak itu fakta siapa','Yang benar paling banyak dapat stiker!']},
+   {t:'list',tag:'GAME 02',title:'Robot & Programmer',items:['Satu orang jadi robot','Temannya kasih perintah langkah demi langkah','Begitulah cara komputer berpikir!']},
+   {t:'done',title:'Kenalan',progress:1,total:1,next:'PILIH KELASMU: WEB / GAME'}]}]},
+ {id:'about',name:'tentang_kodita.txt',type:'note',text:'<span class="h"># KODITA</span>\nProyek sosial belajar koding bareng\nkakak-kakak SMA untuk adik-adik SMP.\n\n<span class="h">## Kelas</span>\n- Web Dev  : HTML, CSS, JavaScript\n- Game Dev : Roblox Studio\n\n<span class="h">## Jadwal</span>\nSetiap Sabtu\n\n<span class="h">## Tips</span>\nDouble-click folder untuk membuka materi.'}
+];
+/* =================================================================== */
+
+const $=s=>document.querySelector(s);
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const ICON={
+ folder:c=>`<svg viewBox="0 0 54 46"><path d="M3 8a3 3 0 0 1 3-3h14l5 5h23a3 3 0 0 1 3 3v27a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z" fill="${c}" opacity=".35"/><path d="M3 15h48v25a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z" fill="${c}" opacity=".85"/><path d="M3 15h48" stroke="#EDE9FE" stroke-opacity=".5"/></svg>`,
+ slide:(c,l)=>`<svg viewBox="0 0 54 46"><rect x="7" y="4" width="40" height="30" rx="3" fill="#1A1029" stroke="${c}" stroke-width="2"/><path d="M14 13h18M14 19h26M14 25h12" stroke="${c}" stroke-width="2.5" stroke-linecap="round"/><path d="M27 34v6M19 42h16" stroke="${c}" stroke-width="2" stroke-linecap="round"/>${l?'<rect x="34" y="26" width="16" height="13" rx="2" fill="#0B0614" stroke="#9C8FC0" stroke-width="1.5"/><path d="M38 26v-3a4 4 0 0 1 8 0v3" fill="none" stroke="#9C8FC0" stroke-width="1.5"/>':''}</svg>`,
+ note:()=>`<svg viewBox="0 0 54 46"><path d="M12 3h22l9 9v31H12z" fill="#1A1029" stroke="#C4B5FD" stroke-width="2"/><path d="M34 3v9h9" fill="none" stroke="#C4B5FD" stroke-width="2"/><path d="M18 21h18M18 27h18M18 33h11" stroke="#C4B5FD" stroke-width="2" stroke-linecap="round"/></svg>`
+};
+const iconFor=(f,parent)=>f.type==='folder'?ICON.folder(f.color):f.type==='note'?ICON.note():ICON.slide(parent?.color||'#C4B5FD',f.lock);
+
+/* ---------- cursor ---------- */
+const cur=$('#cur');let mx=-100,my=-100;
+addEventListener('pointermove',e=>{if(e.pointerType!=='mouse')return;mx=e.clientX;my=e.clientY;cur.style.transform=`translate(${mx-3}px,${my-2}px)`});
+addEventListener('pointerdown',e=>{cur.classList.add('down');ripple(e.clientX,e.clientY)});
+addEventListener('pointerup',()=>cur.classList.remove('down'));
+function ripple(x,y){const r=document.createElement('div');r.className='rip';r.style.left=x+'px';r.style.top=y+'px';document.body.appendChild(r);setTimeout(()=>r.remove(),520)}
+function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(()=>el.classList.remove('on'),1800)}
+
+/* ---------- icons ---------- */
+function makeIcon(f,parent){
+  const d=document.createElement('div');d.className='ic'+(f.lock?' lock':'');d.dataset.id=f.id;
+  d.innerHTML=iconFor(f,parent)+`<span>${esc(f.name)}</span>`;
+  let last=0;
+  d.addEventListener('pointerup',e=>{
+    document.querySelectorAll('.ic.sel').forEach(x=>x.classList.remove('sel'));d.classList.add('sel');
+    const now=Date.now();
+    if(e.pointerType!=='mouse'||now-last<380){open(f,d,parent);last=0}else last=now;
+  });
+  return d;
+}
+function open(f,from,parent){
+  if(f.lock){toast('🔒 '+f.name+' — segera hadir');return}
+  const ex=wins.find(w=>w.fid===f.id);if(ex){restore(ex);focus(ex);return}
+  if(f.type==='folder')return explorer(f,from);
+  if(f.type==='note')return win({fid:f.id,title:f.name,path:'C:/KODITA/',w:460,h:440,from,body:`<div class="note">${f.text}</div>`});
+  if(f.type==='slide')return viewer(f,from,parent);
+}
+
+/* ---------- window manager ---------- */
+const wins=[];let Z=20,off=0;
+function win({fid,title,path,w,h,from,body,max}){
+  const el=document.createElement('div');el.className='win';
+  const vw=innerWidth,vh=innerHeight-52;
+  w=Math.min(w,vw-40);h=Math.min(h,vh-40);
+  const x=Math.max(10,(vw-w)/2+off),y=Math.max(10,(vh-h)/2+off*0.6);off=(off+28)%140;
+  Object.assign(el.style,{left:x+'px',top:y+'px',width:w+'px',height:h+'px'});
+  el.innerHTML=`<div class="tb"><span class="ti">${path}<b>${esc(title)}</b></span><button class="mn" aria-label="Minimize">–</button><button class="mx" aria-label="Maximize">▢</button><button class="x" aria-label="Tutup">✕</button></div><div class="wb">${body||''}</div>`;
+  document.body.appendChild(el);
+  const W={el,fid,title,from,max:false,min:false};wins.push(W);
+  const r=from?from.getBoundingClientRect():{left:vw/2,top:vh/2,width:0,height:0};
+  el.style.transformOrigin=`${r.left+r.width/2-x}px ${r.top+r.height/2-y}px`;
+  el.style.transform='scale(.15)';el.style.opacity='0';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{el.style.transform='';el.style.opacity='1'}));
+  const tk=document.createElement('button');tk.className='tk';tk.textContent=title;$('#tasks').appendChild(tk);W.tk=tk;
+  tk.onclick=()=>{if(W.min)restore(W);else if(el.classList.contains('focus'))minimize(W);else focus(W)};
+  el.addEventListener('pointerdown',()=>focus(W));
+  el.querySelector('.x').onclick=e=>{e.stopPropagation();close(W)};
+  el.querySelector('.mn').onclick=e=>{e.stopPropagation();minimize(W)};
+  el.querySelector('.mx').onclick=e=>{e.stopPropagation();toggleMax(W)};
+  el.querySelector('.tb').addEventListener('dblclick',()=>toggleMax(W));
+  drag(W);focus(W);if(max)toggleMax(W);
+  return W;
+}
+function focus(W){wins.forEach(o=>{o.el.classList.remove('focus');o.tk.classList.remove('act')});W.el.style.zIndex=++Z;W.el.classList.add('focus');W.tk.classList.add('act')}
+function close(W){const el=W.el;el.style.transform='scale(.9)';el.style.opacity='0';W.tk.style.transform='scale(.6)';W.tk.style.opacity='0';setTimeout(()=>{el.remove();W.tk.remove()},300);wins.splice(wins.indexOf(W),1);if(W.onclose)W.onclose()}
+function minimize(W){const r=W.tk.getBoundingClientRect(),b=W.el.getBoundingClientRect();W.el.style.transformOrigin=`${r.left+r.width/2-b.left}px ${r.top-b.top}px`;W.el.style.transform='scale(.05)';W.el.style.opacity='0';W.el.style.pointerEvents='none';W.min=true;W.tk.classList.remove('act')}
+function restore(W){if(!W.min)return;W.el.style.transform='';W.el.style.opacity='1';W.el.style.pointerEvents='';W.min=false;focus(W)}
+function toggleMax(W){const s=W.el.style;if(!W.max){W.prev={l:s.left,t:s.top,w:s.width,h:s.height};Object.assign(s,{left:'0px',top:'0px',width:innerWidth+'px',height:(innerHeight-52)+'px'})}else Object.assign(s,{left:W.prev.l,top:W.prev.t,width:W.prev.w,height:W.prev.h});W.max=!W.max}
+function drag(W){const tb=W.el.querySelector('.tb');let sx,sy,ox,oy,on=false;
+  tb.addEventListener('pointerdown',e=>{if(e.target.closest('button')||W.max||innerWidth<=700)return;on=true;W.el.classList.add('drag');sx=e.clientX;sy=e.clientY;ox=W.el.offsetLeft;oy=W.el.offsetTop;tb.setPointerCapture(e.pointerId)});
+  tb.addEventListener('pointermove',e=>{if(!on)return;W.el.style.left=Math.max(-W.el.offsetWidth+80,ox+e.clientX-sx)+'px';W.el.style.top=Math.max(0,Math.min(innerHeight-92,oy+e.clientY-sy))+'px'});
+  tb.addEventListener('pointerup',()=>{on=false;W.el.classList.remove('drag')})}
+
+/* ---------- explorer ---------- */
+function explorer(f,from){
+  const W=win({fid:f.id,title:f.name,path:'C:/KODITA/',w:620,h:400,from});
+  const b=W.el.querySelector('.wb');b.innerHTML=`<div class="exh">${f.children.length} ITEM // DOUBLE-CLICK UNTUK MEMBUKA</div><div class="ex"></div>`;
+  const g=b.querySelector('.ex');
+  f.children.forEach((c,i)=>{const ic=makeIcon(c,f);ic.classList.add('stag');ic.style.animationDelay=(.12+i*.05)+'s';g.appendChild(ic)});
+  return W;
+}
+
+/* ---------- slide viewer ---------- */
+function hl(code,lang){
+  let s=esc(code);
+  if(lang==='html'){s=s.replace(/(&lt;!--[\s\S]*?--&gt;)/g,'<span class="cm">$1</span>').replace(/(&lt;\/?)([a-z0-9]+)/gi,'$1<span class="k">$2</span>').replace(/([a-z-]+)(\s*\{)/gi,'<span class="a">$1</span>$2').replace(/([a-z-]+)(:\s)/gi,'<span class="a">$1</span>$2')}
+  if(lang==='lua'){s=s.replace(/(&quot;|")(.*?)\1/g,'<span class="s">"$2"</span>').replace(/\b(local|function|end|if|then|else|for|do|while|return)\b/g,'<span class="k">$1</span>').replace(/\b(\d+)\b/g,'<span class="nb">$1</span>').replace(/\b(print|workspace)\b/g,'<span class="a">$1</span>')}
+  return s;
+}
+function slideHTML(s){
+  switch(s.t){
+   case 'cover':return `<div class="tag">${s.tag}</div><h1>${esc(s.title)}<br><span class="g">${esc(s.hl)}</span></h1><p class="lead">${esc(s.lead)}</p>`;
+   case 'list':return `<div class="tag">${s.tag}</div><h2>${esc(s.title)}</h2><ul class="obj">${s.items.map((x,i)=>`<li style="transition-delay:${.15+i*.12}s"><span class="n">0${i+1}</span>${esc(x)}</li>`).join('')}</ul>`;
+   case 'code':return `<div class="tag">${s.tag}</div><h2>${esc(s.title)}</h2><div class="cols"><div class="hud"><span class="lbl">INPUT // ${s.lang==='lua'?'Script.lua':'index.html'}</span><pre>${hl(s.code,s.lang)}</pre></div><div class="hud"><span class="lbl">OUTPUT</span>${s.preview?`<div class="prev">${s.preview}</div>`:`<div class="term">${esc(s.output)}</div>`}</div></div>`;
+   case 'live':return `<div class="tag">${s.tag}</div><h2>${esc(s.title)}</h2><div class="cols"><div class="hud"><span class="lbl">EDIT ME</span><textarea spellcheck="false">${esc(s.starter)}</textarea></div><div class="hud"><span class="lbl">LIVE PREVIEW</span><div class="prev live"></div></div></div>`;
+   case 'quiz':return `<div class="tag">${s.tag}</div><h2>${esc(s.title)}</h2><div class="opts">${s.opts.map((o,i)=>`<button class="opt" data-i="${i}">${esc(o)}</button>`).join('')}</div><div class="fb">// pilih satu jawaban</div>`;
+   case 'done':return `<div class="status">STATUS: MISSION COMPLETE</div><h1 style="margin-top:2cqh">${esc(s.title)}<br><span class="g">selesai</span></h1><div class="pbar"><i data-w="${Math.round(s.progress/s.total*100)}"></i></div><div class="mono" style="color:var(--m);font-size:max(11px,1.4cqw)">PROGRESS ${s.progress}/${s.total} // NEXT: ${esc(s.next)}</div>`;
+  }
+}
+function viewer(f,from,parent){
+  const W=win({fid:f.id,title:f.name,path:`C:/KODITA/${parent?parent.name+'/':''}`,w:Math.min(980,innerWidth*.82),h:Math.min(620,(innerHeight-52)*.86),from});
+  const b=W.el.querySelector('.wb');b.style.overflow='hidden';
+  b.innerHTML=`<div class="vw"><div class="stage">${f.slides.map(s=>`<section class="sl">${slideHTML(s)}</section>`).join('')}</div><div class="ctl"><div class="dots">${f.slides.map(()=>'<b></b>').join('')}</div><div><span class="cnt"></span><button class="pv" aria-label="Sebelumnya">←</button><button class="nx" aria-label="Berikutnya">→</button></div></div></div>`;
+  const S=[...b.querySelectorAll('.sl')],D=[...b.querySelectorAll('.dots b')];let i=0;
+  function go(n){n=Math.max(0,Math.min(S.length-1,n));S.forEach((s,k)=>{s.classList.toggle('on',k===n);s.classList.toggle('back',k<n)});D.forEach((d,k)=>d.classList.toggle('on',k===n));b.querySelector('.cnt').textContent=String(n+1).padStart(2,'0')+'/'+String(S.length).padStart(2,'0');
+    S.forEach((s,k)=>s.querySelectorAll('.pbar i').forEach(x=>x.style.width=k===n?x.dataset.w+'%':'0'));i=n}
+  W.go=go;
+  b.querySelector('.nx').onclick=()=>go(i+1);b.querySelector('.pv').onclick=()=>go(i-1);
+  D.forEach((d,k)=>d.onclick=()=>go(k));
+  const key=e=>{if(!W.el.classList.contains('focus')||W.min||e.target.tagName==='TEXTAREA')return;if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();go(i+1)}if(e.key==='ArrowLeft')go(i-1)};
+  addEventListener('keydown',key);W.onclose=()=>removeEventListener('keydown',key);
+  b.querySelectorAll('textarea').forEach(t=>{const o=t.closest('.cols').querySelector('.live');const r=()=>{const tp=document.createElement('template');tp.innerHTML=t.value;tp.content.querySelectorAll('script,iframe,object,embed,link,meta').forEach(x=>x.remove());tp.content.querySelectorAll('*').forEach(el=>[...el.attributes].forEach(a=>{if(/^on/i.test(a.name)||/javascript:/i.test(a.value))el.removeAttribute(a.name)}));const host=o.shadowRoot||o.attachShadow({mode:'open'});host.replaceChildren(tp.content)};t.addEventListener('input',r);r()});
+  S.forEach((sec,k)=>{const s=f.slides[k];if(s.t!=='quiz')return;const fb=sec.querySelector('.fb');sec.querySelectorAll('.opt').forEach(btn=>btn.onclick=()=>{sec.querySelectorAll('.opt').forEach(x=>x.classList.remove('ok','no'));if(+btn.dataset.i===s.ok){btn.classList.add('ok');fb.style.color='var(--ok)';fb.textContent='// ACCESS GRANTED — '+s.msg}else{btn.classList.add('no');fb.style.color='var(--bad)';fb.textContent='// ACCESS DENIED — coba lagi'}})});
+  go(0);return W;
+}
+
+/* ---------- desktop ---------- */
+const desk=$('#desk');
+FS.forEach(f=>desk.appendChild(makeIcon(f)));
+desk.addEventListener('pointerdown',e=>{if(e.target===desk)document.querySelectorAll('.ic.sel').forEach(x=>x.classList.remove('sel'))});
+function tick(){const d=new Date();$('#clock').innerHTML=d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})+'<br>'+d.toLocaleDateString('id-ID',{weekday:'short',day:'numeric',month:'short'})}
+tick();setInterval(tick,15000);
+
+/* ---------- boot ---------- */
+(async()=>{const L=[...document.querySelectorAll('#boot .ln')],bp=$('#bp');
+  for(let k=0;k<L.length;k++){await wait(260);L[k].classList.add('on');bp.style.width=((k+1)/L.length*100)+'%'}
+  await wait(450);$('#boot').classList.add('off');
+  [...desk.children].forEach((ic,k)=>setTimeout(()=>ic.classList.add('in'),250+k*90));
+  setTimeout(()=>$('#boot').remove(),700);
+})();
+function wait(ms){return new Promise(r=>setTimeout(r,ms))}
+
+/* ---------- demo: kursor otomatis ---------- */
+const gh=$('#ghost');let gx=innerWidth/2,gy=innerHeight/2,demoOn=false;
+async function moveTo(el,dur=900){const r=el.getBoundingClientRect(),tx=r.left+r.width/2,ty=r.top+r.height/2,sx=gx,sy=gy,t0=performance.now();
+  await new Promise(res=>{const step=t=>{let p=Math.min(1,(t-t0)/dur);p=p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;gx=sx+(tx-sx)*p;gy=sy+(ty-sy)*p-Math.sin(p*Math.PI)*40;gh.style.transform=`translate(${gx-4}px,${gy-3}px)`;p<1?requestAnimationFrame(step):res()};requestAnimationFrame(step)})}
+async function clickG(n=1){for(let k=0;k<n;k++){gh.classList.add('down');ripple(gx,gy);await wait(110);gh.classList.remove('down');await wait(110)}}
+$('#demo').onclick=async()=>{if(demoOn)return;demoOn=true;$('#demo').textContent='■ demo…';
+  wins.slice().forEach(close);await wait(350);
+  gh.style.transform=`translate(${gx}px,${gy}px)`;gh.style.opacity='1';
+  const fIc=desk.querySelector('[data-id="web"]');await moveTo(fIc);fIc.classList.add('sel');await clickG(2);
+  const F=FS.find(x=>x.id==='web');const W=explorer(F,fIc);await wait(900);
+  const file=W.el.querySelector('[data-id="web1"]');await moveTo(file,800);file.classList.add('sel');await clickG(2);
+  const V=viewer(F.children[0],file,F);await wait(1200);
+  const nx=V.el.querySelector('.nx');await moveTo(nx,700);
+  for(let k=0;k<3;k++){await clickG(1);V.go(k+1);await wait(1300)}
+  const t=V.el.querySelector('.sl.on textarea');if(t){await moveTo(t,600);await clickG(1);const add='\n<p>Aku jago ngoding!</p>';for(const ch of add){t.value+=ch;t.dispatchEvent(new Event('input'));await wait(45)}await wait(900)}
+  await moveTo(nx,500);await clickG(1);V.go(4);await wait(900);
+  const ok=V.el.querySelector('.sl.on .opt[data-i="1"]');if(ok){await moveTo(ok,700);await clickG(1);ok.click();await wait(1500)}
+  await moveTo(nx,500);await clickG(1);V.go(5);await wait(1600);
+  gh.style.opacity='0';demoOn=false;$('#demo').textContent='▶ demo';
+};
+</script>
+</body>
+</html>
